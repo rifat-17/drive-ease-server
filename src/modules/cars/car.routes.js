@@ -1,7 +1,7 @@
 
 import { Router } from "express";
 
-import { addCar } from "./car.controller.js";
+import { addCar, getAllCars } from "./car.controller.js";
 import {
   verifyToken,
   verifyOwner,
@@ -9,7 +9,11 @@ import {
 
 const router = Router();
 
+// Get all approved and active cars
+router.get("/", getAllCars);
+
 // Add a new car (Owner only)
 router.post("/", verifyToken, verifyOwner, addCar);
+
 
 export default router;
