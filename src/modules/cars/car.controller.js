@@ -21,6 +21,28 @@ export const addCar = async (req, res) => {
       });
     }
 
+    const carsCollection = getCollection("cars");
+
+    const ownerId = new ObjectId(req.user._id);
+
+    // Check owner's subscription plan
+    const subscriptionPlan = req.user.subscriptionPlan || "FREE";
+
+    // FREE plan allows only 2 active cars
+    if (subscriptionPlan === "FREE") {
+      const activeCars = await carsCollection.countDocuments({
+        ownerId,
+        isActive: true,
+      });
+
+      if (activeCars >= 2) {
+        return res.status(403).send({
+          success: false,
+          message: "Free plan allows only 2 active cars. Upgrade to Pro to add unlimited cars.",
+        });
+      }
+    }
+
     const {
       brand,
       model,
@@ -47,15 +69,12 @@ export const addCar = async (req, res) => {
       fuelType,
       seats: Number(seats),
       images,
-
-      // Set by the server, never by the client.
-      ownerId: new ObjectId(req.user._id),
+      ownerId,
       status: "PENDING",
       isActive: true,
       createdAt: new Date(),
     };
 
-    const carsCollection = getCollection("cars");
     const result = await carsCollection.insertOne(newCar);
 
     return res.status(201).send({
@@ -75,6 +94,7 @@ export const addCar = async (req, res) => {
     });
   }
 };
+
 
 
 
