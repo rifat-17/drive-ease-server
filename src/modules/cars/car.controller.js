@@ -475,6 +475,70 @@ export const updateCar = async (req, res) => {
 
 
 
+// Toggle car availability
+export const toggleCarAvailability = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid car ID.",
+      });
+    }
+
+    if (typeof isActive !== "boolean") {
+      return res.status(400).send({
+        success: false,
+        message: "Availability must be a boolean value.",
+      });
+    }
+
+    const carsCollection = getCollection("cars");
+
+    const result = await carsCollection.updateOne(
+      {
+        _id: new ObjectId(id),
+        ownerId: new ObjectId(req.user._id),
+      },
+      {
+        $set: {
+          isActive,
+        },
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).send({
+        success: false,
+        message: "Car not found or you are not the owner.",
+      });
+    }
+
+    const updatedCar = await carsCollection.findOne({
+      _id: new ObjectId(id),
+      ownerId: new ObjectId(req.user._id),
+    });
+
+    return res.status(200).send({
+      success: true,
+      message: "Car availability updated successfully.",
+      data: updatedCar,
+    });
+  } catch (error) {
+    console.error("Toggle car availability error:", error);
+
+    return res.status(500).send({
+      success: false,
+      message: "Failed to update car availability.",
+    });
+  }
+};
+
+
+
+
 //delete cars
 export const deleteCar = async (req, res) => {
   try {

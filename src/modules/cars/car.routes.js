@@ -1,7 +1,7 @@
 
 import { Router } from "express";
 
-import { addCar, deleteCar, getAllCars, getCarById, getMyCars, updateCar } from "./car.controller.js";
+import { addCar, deleteCar, getAllCars, getCarById, getMyCars, updateCar, toggleCarAvailability, } from "./car.controller.js";
 import {
   verifyToken,
   verifyOwner,
@@ -26,6 +26,15 @@ router.post("/", verifyToken, verifyOwner, addCar);
 
 // Update a car (Owner only)
 router.put("/:id", verifyToken, verifyOwner, updateCar);
+
+
+router.patch(
+  "/:id/availability",
+  verifyToken,
+  verifyOwner,
+  toggleCarAvailability
+);
+
 
 // Delete a car (Owner only)
 router.delete("/:id", verifyToken, verifyOwner, deleteCar);
